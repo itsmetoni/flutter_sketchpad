@@ -9,7 +9,7 @@ part 'sketch_insert.g.dart';
 enum SketchInsertType { drawing, text, eraser }
 
 @freezed
-class SketchInsert with _$SketchInsert {
+sealed class SketchInsert with _$SketchInsert {
   /// An individual sketch insert tied to a specific section.
   const factory SketchInsert({
     /// Unique insert ID

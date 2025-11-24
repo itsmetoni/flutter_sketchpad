@@ -6,8 +6,8 @@ part of 'sketch_insert.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SketchInsertImpl _$$SketchInsertImplFromJson(Map<String, dynamic> json) =>
-    _$SketchInsertImpl(
+_SketchInsert _$SketchInsertFromJson(Map<String, dynamic> json) =>
+    _SketchInsert(
       id: json['id'] as String,
       sketchId: json['sketchId'] as String?,
       sectionId: json['sectionId'] as String,
@@ -26,7 +26,7 @@ _$SketchInsertImpl _$$SketchInsertImplFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['createdAt'] as String),
     );
 
-Map<String, dynamic> _$$SketchInsertImplToJson(_$SketchInsertImpl instance) =>
+Map<String, dynamic> _$SketchInsertToJson(_SketchInsert instance) =>
     <String, dynamic>{
       'id': instance.id,
       'sketchId': instance.sketchId,
