@@ -110,19 +110,22 @@ class _SketchCanvasState extends State<SketchCanvas> {
 
   Widget _buildDrawingLayer() {
     return Positioned.fill(
-      child: ClipRect(
-        child: CustomPaint(
-          painter: SketchInsertPainter(
-            inserts: _sectionInserts,
-            currentPoints: _drawingController.currentDrawingPoints,
-            currentStrokeWidth: _getStrokeWidth(),
-            currentColor: _getDrawingColor() ?? Colors.transparent,
-            currentMode: _currentMode,
-          ),
-          child: Container(
-            color: Colors.transparent,
-            width: double.infinity,
-            height: double.infinity,
+      child: IgnorePointer(
+        ignoring: _currentMode == SketchMode.none,
+        child: ClipRect(
+          child: CustomPaint(
+            painter: SketchInsertPainter(
+              inserts: _sectionInserts,
+              currentPoints: _drawingController.currentDrawingPoints,
+              currentStrokeWidth: _getStrokeWidth(),
+              currentColor: _getDrawingColor() ?? Colors.transparent,
+              currentMode: _currentMode,
+            ),
+            child: Container(
+              color: Colors.transparent,
+              width: double.infinity,
+              height: double.infinity,
+            ),
           ),
         ),
       ),
@@ -152,22 +155,25 @@ class _SketchCanvasState extends State<SketchCanvas> {
     if (textInserts.isEmpty) return const SizedBox.shrink();
 
     return Positioned.fill(
-      child: Stack(
-        children: textInserts
-            .map((insert) => TextInsertWidget(
-                  key: ValueKey(insert.id),
-                  insert: insert,
-                  isInteractive: _currentMode == SketchMode.text,
-                  onTap: () => _textController.editExisting(insert),
-                  onDragStart: (position) =>
-                      _textController.startDragging(insert.id, position),
-                  onDragUpdate: (position) => _textController
-                      .updateDragPosition(position, context.size),
-                  onDragEnd: _textController.stopDragging,
-                  // Always visible - no transparency changes
-                  isTransparent: false,
-                ))
-            .toList(),
+      child: IgnorePointer(
+        ignoring: _currentMode != SketchMode.text,
+        child: Stack(
+          children: textInserts
+              .map((insert) => TextInsertWidget(
+                    key: ValueKey(insert.id),
+                    insert: insert,
+                    isInteractive: _currentMode == SketchMode.text,
+                    onTap: () => _textController.editExisting(insert),
+                    onDragStart: (position) =>
+                        _textController.startDragging(insert.id, position),
+                    onDragUpdate: (position) => _textController
+                        .updateDragPosition(position, context.size),
+                    onDragEnd: _textController.stopDragging,
+                    // Always visible - no transparency changes
+                    isTransparent: false,
+                  ))
+              .toList(),
+        ),
       ),
     );
   }
