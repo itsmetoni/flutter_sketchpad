@@ -228,8 +228,12 @@ class _MultiCanvasRegionState extends State<MultiCanvasRegion> {
           onRemoveInsert: wrapper._handleRemoveInsert,
         );
 
-        // Remove the InkWell tap functionality since we don't need active canvas selection
-        return child;
+        // Wrap with IgnorePointer when annotation mode is disabled
+        // This allows touch events to pass through to underlying widgets
+        return IgnorePointer(
+          ignoring: !wrapper.widget.isEnabled,
+          child: child,
+        );
       },
     );
   }

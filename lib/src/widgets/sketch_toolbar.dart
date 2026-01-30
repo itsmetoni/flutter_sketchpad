@@ -344,7 +344,7 @@ class _SketchToolbarState extends State<SketchToolbar>
             ),
             child: Icon(
               icon,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Colors.white,
               size: 20,
             ),
           ),
