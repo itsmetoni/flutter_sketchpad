@@ -44,8 +44,7 @@ class MultiCanvasExamplePage extends StatefulWidget {
   State<MultiCanvasExamplePage> createState() => _MultiCanvasExamplePageState();
 }
 
-class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage>
-    with SingleTickerProviderStateMixin {
+class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage> {
   // Controller will be initialized after loading inserts from server
   MultiCanvasSketchController? controller;
   final List<SketchInsert> inserts = []; // This will be synced from controller
@@ -85,10 +84,6 @@ class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage>
   ];
 
   int _currentPresetIndex = 2; // Start with 'Smooth'
-
-  // Animation for fade-in effect
-  late AnimationController _fadeAnimationController;
-  late Animation<double> _fadeAnimation;
 
   // Sample sections content
   final List<Map<String, dynamic>> sections = [
@@ -130,20 +125,6 @@ class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage>
   void initState() {
     super.initState();
 
-    // Initialize fade animation controller
-    _fadeAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeAnimationController,
-      curve: Curves.easeInOut,
-    ));
-
     // Load sample inserts asynchronously and initialize controller with them
     _loadInsertsFromServer();
   }
@@ -172,9 +153,6 @@ class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage>
     setState(() {
       isLoadingInserts = false;
     });
-
-    // Start fade-in animation
-    _fadeAnimationController.forward();
 
     debugPrint(
         'Loaded ${sampleInserts.length} inserts from server and initialized controller');
@@ -454,6 +432,107 @@ class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage>
         controller!.mode != SketchMode.none;
   }
 
+  // Show test modal for long press testing
+  void _showTestModal(BuildContext context, String sectionTitle) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[850]
+                : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 16),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Icon(
+                Icons.check_circle,
+                color: Colors.green[600],
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Long Press Detected!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Section: $sectionTitle',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  isSketchMode
+                      ? '⚠️ Annotation mode is ENABLED\nLong press should NOT work!'
+                      : '✅ Annotation mode is DISABLED\nLong press is working correctly!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color:
+                        isSketchMode ? Colors.orange[700] : Colors.green[700],
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[600],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Close',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   // Build positioned toolbar based on current selection
   Widget _buildPositionedToolbar() {
     if (isLoadingInserts || controller == null) {
@@ -719,64 +798,101 @@ class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage>
                           width: 1,
                         ),
                       ),
-                      child: FadeInMultiCanvasRegion(
-                        sectionId: index.toString(),
-                        fadeAnimation: _fadeAnimation,
-                        isLoadingInserts: isLoadingInserts,
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 200),
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(8),
+                      child: GestureDetector(
+                        onLongPress: () {
+                          print('long press');
+                          _showTestModal(
+                            context,
+                            section['title'] as String,
+                          );
+                        },
+                        child: MultiCanvasRegion(
+                          sectionId: index.toString(),
+                          child: Container(
+                            constraints: const BoxConstraints(minHeight: 200),
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        section['icon'] as IconData,
+                                        color: Colors.grey[600],
+                                        size: 20,
+                                      ),
                                     ),
-                                    child: Icon(
-                                      section['icon'] as IconData,
-                                      color: Colors.grey[600],
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          section['title'] as String,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            section['title'] as String,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          section['subtitle'] as String,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[600],
+                                          Text(
+                                            section['subtitle'] as String,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                section['content'] as String,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  height: 1.5,
+                                  ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 16),
+                                Text(
+                                  section['content'] as String,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    height: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[100],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.touch_app,
+                                        size: 14,
+                                        color: Colors.blue[700],
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Long press to test modal',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.blue[700],
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -798,54 +914,7 @@ class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage>
 
   @override
   void dispose() {
-    _fadeAnimationController.dispose();
     controller?.dispose(); // Safe dispose with null check
     super.dispose();
-  }
-}
-
-/// MultiCanvasRegion with fade-in animation support
-class FadeInMultiCanvasRegion extends StatelessWidget {
-  const FadeInMultiCanvasRegion({
-    required this.sectionId,
-    required this.fadeAnimation,
-    required this.isLoadingInserts,
-    required this.child,
-    super.key,
-  });
-
-  final String sectionId;
-  final Animation<double> fadeAnimation;
-  final bool isLoadingInserts;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: fadeAnimation,
-      builder: (context, _) {
-        return Stack(
-          children: [
-            // Always show the content (text, etc.)
-            child,
-            // Show sketch layer with opacity animation
-            if (!isLoadingInserts)
-              Positioned.fill(
-                child: Opacity(
-                  opacity: fadeAnimation.value,
-                  child: MultiCanvasRegion(
-                    sectionId: sectionId,
-                    child: Container(
-                      // Transparent container that covers the entire area
-                      // This ensures the sketch overlay covers the entire area
-                      color: Colors.transparent,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
   }
 }
