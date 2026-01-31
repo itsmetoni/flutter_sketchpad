@@ -110,19 +110,23 @@ class _SketchCanvasState extends State<SketchCanvas> {
 
   Widget _buildDrawingLayer() {
     return Positioned.fill(
-      child: ClipRect(
-        child: CustomPaint(
-          painter: SketchInsertPainter(
-            inserts: _sectionInserts,
-            currentPoints: _drawingController.currentDrawingPoints,
-            currentStrokeWidth: _getStrokeWidth(),
-            currentColor: _getDrawingColor() ?? Colors.transparent,
-            currentMode: _currentMode,
-          ),
-          child: Container(
-            color: Colors.transparent,
-            width: double.infinity,
-            height: double.infinity,
+      child: IgnorePointer(
+        // Ignore pointer events when no tool is selected
+        ignoring: _currentMode == SketchMode.none,
+        child: ClipRect(
+          child: CustomPaint(
+            painter: SketchInsertPainter(
+              inserts: _sectionInserts,
+              currentPoints: _drawingController.currentDrawingPoints,
+              currentStrokeWidth: _getStrokeWidth(),
+              currentColor: _getDrawingColor() ?? Colors.transparent,
+              currentMode: _currentMode,
+            ),
+            child: Container(
+              color: Colors.transparent,
+              width: double.infinity,
+              height: double.infinity,
+            ),
           ),
         ),
       ),

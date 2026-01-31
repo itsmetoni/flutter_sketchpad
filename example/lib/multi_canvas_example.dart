@@ -798,16 +798,16 @@ class _MultiCanvasExamplePageState extends State<MultiCanvasExamplePage> {
                           width: 1,
                         ),
                       ),
-                      child: GestureDetector(
-                        onLongPress: () {
-                          print('long press');
-                          _showTestModal(
-                            context,
-                            section['title'] as String,
-                          );
-                        },
-                        child: MultiCanvasRegion(
-                          sectionId: index.toString(),
+                      child: MultiCanvasRegion(
+                        sectionId: index.toString(),
+                        child: GestureDetector(
+                          onLongPress: () {
+                            print('long press');
+                            _showTestModal(
+                              context,
+                              section['title'] as String,
+                            );
+                          },
                           child: Container(
                             constraints: const BoxConstraints(minHeight: 200),
                             padding: const EdgeInsets.all(24),
